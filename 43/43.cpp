@@ -8,52 +8,55 @@
 
 using namespace std;
 
-bool dfs(vector<double> &v, vector<bool> &used, const ssize_t expect, const ssize_t size){
-    cout << "size=" << size << endl;
-    //加减乘除后的值总是放在最后
+bool dfs(vector<double> &v, vector<bool> &used, ssize_t top, const ssize_t expect, const ssize_t size){
+    //cout << "size=" << size << endl;
+    //加减乘除后的值总是放在最后,标记为top
     if (size == 1) {
-        if (fabs(v[v.size() - 1] - expect) > 1E-10)
+        if (fabs(v[top] - expect) < 1E-5){
+            //cout << "top=" << v[top] << ",expect=" << expect << endl;
             return true;
-        else
+        } else {
             return false;
+        }
     }
-    for (ssize_t i = 0; i < v.size(); ++ i) {
+    for (ssize_t i = 0; i <= top; ++ i) {
         if (used[i])
             continue;
         used[i] = true;
-        for (ssize_t j = i; j < v.size(); ++ j) {
+        for (ssize_t j = i; j <= top; ++ j) {
             if (used[j])
                 continue;
             used[j] = true;
             //任意取两个元素做加减乘除,把加减乘除后的结果放到队尾
             //队列的size --
-            v.push_back(0);
-            double &top = v[v.size() -1];
-            top = v[i] + v[j];
-            if (dfs(v, used, expect, size-1)){
+            double a = v[i], b = v[j];
+            double &topv = v[++ top];
+            topv = a + b;
+            if (dfs(v, used, top, expect, size-1)){
                 return true;
             }
-            top = v[i] * v[j];
-            if (dfs(v, used, expect, size-1)){
+            topv = a * b;
+            if (dfs(v, used, top, expect, size-1)){
                 return true;
             }
-            top = v[i] - v[j];
-            if (dfs(v, used, expect, size-1)){
+            topv = a - b;
+            if (dfs(v, used, top, expect, size-1)){
                 return true;
             }
-            top = v[j] - v[i];
-            if (dfs(v, used, expect, size-1)){
+            topv = b - a;
+            if (dfs(v, used, top, expect, size-1)){
                 return true;
             }
-            top = v[i]/v[j];
-            if (dfs(v, used, expect, size-1)){
+            topv = a / b;
+            if (dfs(v, used, top, expect, size-1)){
                 return true;
             }
-            top = v[j]/v[i];
-            if (dfs(v, used, expect, size-1)){
+            topv = b / a;
+            if (dfs(v, used, top, expect, size-1)){
                 return true;
             }
-            v.pop_back();
+            topv = 0;
+            top -- ;
             used[j] = false;
         }
         used[i] = false;
@@ -70,12 +73,12 @@ int main(){
         vector<double> v;
         vector<bool> used;
         cin >> M >> N;
-        v.resize(M, 0);
-        used.resize(100, false);
+        v.resize(M*10, 0);
+        used.resize(M*10, false);
         for (size_t i = 0; i < M; ++ i){
             cin >> v[i];
         }
-        if (dfs(v, used, N, M))
+        if (dfs(v, used, M - 1, N, M))
             cout << "Yes" << endl;
         else
             cout << "No" << endl;
